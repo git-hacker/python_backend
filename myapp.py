@@ -24,7 +24,7 @@ def login():
 @app.route("/user", methods=["POST","PUT","GET"]) # start
 def log():
     if request.method == "POST":
-    # add a new user
+        # add a new user
         pw = request.form.get("password")
         id = request.form.get("name")
         userID = id
@@ -32,15 +32,15 @@ def log():
         if abc == 0:
             # fn = request.form.get("FirstName")
             # ln = request.form.get("LastName")
-
+            
             add_user(id, pw)
-            session[id] = [pw,[],[],0,None,None]
+            session[id] = [pw,0,[],0,None,None]
             db.session.commit()
             return jsonify({
-                "name": id,
-                })
-
-
+                           "name": id,
+                           })
+    
+    
         abcd=Driver.query.filter_by(id=id).first()
         password =abcd.password
         if password==pw:
@@ -55,18 +55,18 @@ def log():
             #for trip in trips:
             #    session[userID][2].append(trip.id)
             return jsonify({
-                "name": id
-                })
+                           "name": id
+                           })
         else:
             return jsonify({"error":"wrong"}), 400
 
-    if request.method =='GET':
-        if session == {}:
-            return jsonify({"error":"wrong"}), 401
+if request.method =='GET':
+    if session == {}:
+        return jsonify({"error":"wrong"}), 401
         for id in session:
             userID = id
             break
-        dictionary1 = {}
+    dictionary1 = {}
         dictionary1["car"]=session[userID][1]
         dictionary1["trip"]=session[userID][2]
         dictionary1["point"]=session[userID][3]
@@ -74,15 +74,15 @@ def log():
         dictionary1["gender"]=session[userID][5]
         dictionary1["name"]= userID
         return jsonify(dictionary1)
-    if session != {}:
-        return jsonify({"error":"wrong"}), 401
+if session != {}:
+    return jsonify({"error":"wrong"}), 401
     user=Driver.query.filter_by(username=session[userID]).first()
     user.gender = request.form.get("gender")
     user.age = request.form.get("age")
     user.password = request.form.get("password")
     # user.lastname= request.form.get("lastname")
     # user.firstname= request.form.get("firstname")
-
+    
     # session[userID][0]=user.firstname
     # session[userID][1]=user.lastname
     session[userID][0]=user.password
@@ -90,8 +90,8 @@ def log():
     session[userID][5]=user.gender
     db.session.commit()
     return jsonify({
-        "condition": "success"
-    })
+                   "condition": "success"
+                   })
 
 @app.route("/score", methods=["GET"])
 def ranking():
@@ -108,14 +108,14 @@ def ranking():
                 id = user.id
                 break
         return jsonify({
-            "username": id,
-            "score": score,
-            "rank": rank,
-            })
+                       "username": id,
+                       "score": score,
+                       "rank": rank,
+                       })
 
 @app.route("/journey",methods=['POST'])
 def journey():
-        address = "https://restapi.amap.com/v4/direction/truck?key=f2d1df02fc1c58d8a4ed23bfc0b584bd&"
+    address = "https://restapi.amap.com/v4/direction/truck?key=f2d1df02fc1c58d8a4ed23bfc0b584bd&"
         origin=request.form.get("origin")
         passing = request.form.get("passing")
         destination = request.form.get("destination")
@@ -132,12 +132,12 @@ def journey():
         pro = pro/time
         if pro < 0.15 and pro > -0.15:
             fs = score
-        else:
-            fs = score*(1-abs(pro))
+    else:
+        fs = score*(1-abs(pro))
         user=Driver.query.filter_by(id=userID).first()
         user.point += fs
         session[userID][3]+=fs
-
+        
         journey=Journey(id="from {origin} to {destination}",origin=origin,destination=destination, time=time,driver=userID)
         db.session.add(journey)
         user.journey += "/{journey.id}"
@@ -152,9 +152,12 @@ def journey():
 
 @app.route("/truck",methods= ["POST","GET"])
 def add_truck():
+    for ida in session.keys():
+        userID = ida
+        break
     if request.method == "POST":
         numbe = request.form.get("numbe")
-        policy = request.form.get("policy")
+        policy = 1
         size = request.form.get("size")
         width = request.form.get("width")
         height = request.form.get("height")
@@ -173,36 +176,41 @@ def add_truck():
             weight = 10
         if axlesNum == None:
             axlesNum = 2
-        session[id][1].append(numb)
+        userID = ""
+        for ida in session.keys():
+            userID = ida
+            break
+        #user = Driver.query.filter_by(id=userID).first()
+        #user.cars =1
+        #session[userID][1] +=1
+        owner = userID
         truck = Car(numbe=numbe,policy=policy,size=size,width=width,height=height,load=load,weight=weight,axlesNum=axlesNum,province=province,owner=owner)
         db.session.add(truck)
 
 
 
 
-        db.session.commit()
-        return jsonify({
-            "condition":"success"
-        })
-
-
+db.session.commit()
+return jsonify({
+               "condition":"success"
+               })
+    
+    
     else:
         dict = {}
+        for ida in session:
+            userID = id
+            break
         cars=Car.query.filter_by(owner=session[userID]).all()
         for a in cars:
             dict["{a.numbe} "]=[a.numbe, a.policy, a.size, a.width, a.height, a.load, a.weight, a.axlesNum, a.province, a.owner]
         return json.dumps(dict)
 if __name__== '__main__':
     app.run(
-        host = '0.0.0.0',
-        port = 5000,
-        debug = True
-    )
-
-
-
-
-
+            host = '0.0.0.0',
+            port = 5000,
+            debug = True
+            )
 
 
 
@@ -237,11 +245,11 @@ def car():
     id = request.form.get("NewID")
     Driver.add_user(id, fn, ln , pw)
     return jsonify({
-        "origin": fn,
-        "destination": ln,
-        "duration": pw,
-        "passengers": id
-        })
+                   "origin": fn,
+                   "destination": ln,
+                   "duration": pw,
+                   "passengers": id
+                   })
 
 # def car():
 #     fn = request.form.get("Firstname")
@@ -271,7 +279,7 @@ def personal():
 @app.route("/journey", methods= ['POST']) # check the route
 def JOURNEY_info():
     journey = Journey("""info""")
-
+    
     return '11111'
 # Route for handling the login page logic
 # @app.route('/login', methods=["POST"])

@@ -16,26 +16,25 @@ class Driver(db.Model):
     password = db.Column(db.String, nullable=False)
     # firstname = db.Column(db.String, nullable=False)
     # lastname = db.Column(db.String, nullable=False)
-
-
-
-    cars = db.relationship("Car", backref="drivers", lazy=True)
-    cars = db.Column(db.String, db.ForeignKey("cars.numbe"),nullable=True)
+    
+    
+    
+    cars = db.Column(db.Integer)
     journeys = db.relationship("Journey", backref="drivers", lazy=True)
     journeys = db.Column(db.String, db.ForeignKey("journeys.id"),nullable=True)
-
-
-
-
+    
+    
+    
+    
     gender = db.Column(db.String, nullable= True)
     age =db.Column(db.Integer, nullable= True)
     point =db.Column(db.Float, nullable= True)
 
 
-    # def add_car(self, """info of car"""):
-    #     c = Car("""info of car""")
-    #     db.session.add(c)
-    #     db.session.commit()
+# def add_car(self, """info of car"""):
+#     c = Car("""info of car""")
+#     db.session.add(c)
+#     db.session.commit()
 
 class Car(db.Model):
     __tablename__ = "cars"
@@ -48,12 +47,11 @@ class Car(db.Model):
     weight = db.Column(db.Float) # default 10
     axlesNum = db.Column(db.Integer) # default 2
     province = db.Column(db.String)
-    owner = db.Column(db.String)
-
-
-
-    driver = db.Column(db.String, db.ForeignKey("drivers.id"), nullable=False)
-    journey = db.Column(db.String, db.ForeignKey("journeys.id"), nullable=False)
+    owner = db.Column(db.String, nullable=True)
+    
+    
+    
+    driver = db.Column(db.String, nullable=True)
 
 class Journey(db.Model):
     __tablename__ = "journeys"
@@ -62,7 +60,7 @@ class Journey(db.Model):
     destination = db.Column(db.String, nullable=False)
     end = db.Column(db.Integer)
     time= db.Column(db.Integer)
-
+    
     driver = db.Column(db.String, db.ForeignKey("drivers.id"), nullable=False)
 
 def add_user(id,pw):
